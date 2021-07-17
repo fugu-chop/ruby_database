@@ -33,6 +33,8 @@ class CLI
       else 
         puts "You must provide an amount and memo."
       end
+    when "search"
+      @expenses.search_expense(ARGV[1])
     else
       display_help
     end
@@ -44,10 +46,6 @@ class ExpenseData
     @db = PG.connect(dbname:"expenses")
   end
 
-  def results
-    @results = @db.exec("SELECT * FROM expenses ORDER BY created_on ASC;")
-  end
-
   def add_expense(amount, memo)
     date = Date.today
     @db.exec_params("
@@ -56,7 +54,22 @@ class ExpenseData
   end
 
   def list_expense
-    results.each do |tuple|
+    display_expenses(results)
+  end
+
+  def search_expense(term)
+    filtered_results = @db.exec_params("SELECT * FROM expenses WHERE memo ILIKE $1", ["%#{term}%"])
+    display_expenses(filtered_results)
+  end
+
+  private
+
+  def results
+    @results = @db.exec("SELECT * FROM expenses ORDER BY created_on ASC;")
+  end
+
+  def display_expenses(obj)
+    obj.each do |tuple|
       row = [tuple["id"].rjust(3), tuple["created_on"].rjust(10), tuple["amount"].rjust(8), tuple["memo"]]
       puts row.join(" | ")
     end
