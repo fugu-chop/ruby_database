@@ -12,7 +12,7 @@ class CLI
     # ARGV will be an Array of arguments that have been passed to your command-line program.
     case ARGV.first
     when "list"
-      @expenses.list_expenses
+      @expenses.list_expense
     when "add"
       if ARGV.size == 3 
         @expenses.add_expense(ARGV[1], ARGV[2]) 
