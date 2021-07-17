@@ -54,6 +54,7 @@ class ExpenseData
   end
 
   def list_expense
+    results = @db.exec("SELECT * FROM expenses ORDER BY created_on ASC;")
     display_expenses(results)
   end
 
@@ -63,10 +64,6 @@ class ExpenseData
   end
 
   private
-
-  def results
-    @results = @db.exec("SELECT * FROM expenses ORDER BY created_on ASC;")
-  end
 
   def display_expenses(obj)
     obj.each do |tuple|
