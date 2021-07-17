@@ -7,6 +7,20 @@ class CLI
     @expenses = ExpenseData.new
   end
 
+  def display_help
+    puts <<~MSG
+    Welcome to the CLI expense recording system.
+
+    Commands:
+
+    add AMOUNT MEMO [DATE] - record a new expense
+    clear - delete all expenses
+    list - list all expenses
+    delete NUMBER - remove expense with id NUMBER
+    search QUERY - list expenses with a matching memo field
+    MSG
+  end
+
   def execute
     # When writing a script, we can access the list of arguments passed into a command-line program with ARGV. 
     # ARGV will be an Array of arguments that have been passed to your command-line program.
@@ -20,7 +34,7 @@ class CLI
         puts "You must provide an amount and memo."
       end
     else
-      @expenses.display_help
+      display_help
     end
   end
 end
@@ -32,20 +46,6 @@ class ExpenseData
 
   def results
     @results = @db.exec("SELECT * FROM expenses ORDER BY created_on ASC;")
-  end
-
-  def display_help
-    puts <<~MSG
-    Welcome to the CLI expense recording system.
-
-    Commands:
-
-    add AMOUNT MEMO [DATE] - record a new expense
-    clear - delete all expenses
-    list - list all expenses
-    delete NUMBER - remove expense with id NUMBER
-    search QUERY - list expenses with a matching memo field
-    MSG
   end
 
   def add_expense(amount, memo)
