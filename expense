@@ -35,6 +35,10 @@ class CLI
       end
     when "search"
       @expenses.search_expense(ARGV[1])
+    when "delete"
+      @expenses.delete_expense(ARGV[1])
+    when "clear"
+      @expenses.clear_expense
     else
       display_help
     end
@@ -63,7 +67,32 @@ class ExpenseData
     display_expenses(filtered_results)
   end
 
+  def delete_expense(id)
+    puts "There is no expense with the id '#{id}'." unless valid_expense?(id)
+
+    if valid_expense?(id)
+      deleted_row = @db.exec_params("SELECT * FROM expenses where id = $1", [id])
+      @db.exec_params("DELETE FROM expenses WHERE id = $1", [id])
+      puts "The following expense has been deleted:"
+      display_expenses(deleted_row)
+    end
+  end
+
+  def clear_expense
+    # Update CLI class
+    # Display warning message
+      # User inputs y or n
+        # Validate this y or n
+      # If user says 'n', break out of a loop
+      # If user says 'y', execute DELETE FROM expenses
+        # Display a message
+  end
+
   private
+
+  def valid_expense?(id)
+    @db.exec_params("SELECT * FROM expenses WHERE id = $1", [id]).ntuples == 1
+  end
 
   def display_expenses(obj)
     obj.each do |tuple|
