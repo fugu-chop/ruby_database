@@ -1,5 +1,6 @@
 #! /usr/bin/env ruby
 require "pg"
+require "io/console"
 
 # This is the execution class, we need some sort of 'run' method I think
 class CLI
@@ -38,7 +39,7 @@ class CLI
     when "delete"
       @expenses.delete_expense(ARGV[1])
     when "clear"
-      @expenses.clear_expense
+      @expenses.clear_expenses
     else
       display_help
     end
@@ -78,14 +79,19 @@ class ExpenseData
     end
   end
 
-  def clear_expense
-    # Update CLI class
-    # Display warning message
-      # User inputs y or n
-        # Validate this y or n
-      # If user says 'n', break out of a loop
-      # If user says 'y', execute DELETE FROM expenses
-        # Display a message
+  def clear_expenses
+    response = nil
+
+    loop do
+      puts "This will remove all expenses. Are you sure? (y/n)"
+      response = $stdin.getch
+      break if ['y', 'n'].include?(response)
+      puts "\nThat's not a valid response - please enter y/n"
+    end
+
+    return if response == 'n'
+    @db.exec("DELETE FROM expenses")
+    puts "All expenses have been deleted."
   end
 
   private
