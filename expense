@@ -1,4 +1,5 @@
 #! /usr/bin/env ruby
+# This is known as a "hash-bang", and it allows a shell program to execute the script using the Ruby interpreter. 
 require "pg"
 require "io/console"
 
@@ -60,12 +61,16 @@ class ExpenseData
 
   def list_expense
     results = @db.exec("SELECT * FROM expenses ORDER BY created_on ASC;")
+    display_count(results)
     display_expenses(results)
+    display_total(results) if results.ntuples > 0
   end
 
   def search_expense(term)
     filtered_results = @db.exec_params("SELECT * FROM expenses WHERE memo ILIKE $1", ["%#{term}%"])
+    display_count(filtered_results)
     display_expenses(filtered_results)
+    display_total(filtered_results) if filtered_results.ntuples > 0
   end
 
   def delete_expense(id)
@@ -84,6 +89,12 @@ class ExpenseData
 
     loop do
       puts "This will remove all expenses. Are you sure? (y/n)"
+      # We can't use Kernel#gets, because if there are any values in ARGV 
+      # (which is required since we need an argument with ./expense to call clear_expenses)
+      # the Kernel#gets method tries to treat the first value in ARGV as a file and read from that file (no 'clear' file)
+      # To read from the user's input (i.e., stdin) in such a situation
+      # you have to use it STDIN.gets or $stdin.gets explicitly. 
+      # getch only allows a single character input
       response = $stdin.getch
       break if ['y', 'n'].include?(response)
       puts "\nThat's not a valid response - please enter y/n"
@@ -105,6 +116,17 @@ class ExpenseData
       row = [tuple["id"].rjust(3), tuple["created_on"].rjust(10), tuple["amount"].rjust(8), tuple["memo"]]
       puts row.join(" | ")
     end
+  end
+
+  def display_count(obj)
+    counter = obj.ntuples > 0 ? obj.ntuples : 'no'
+    puts "There are #{counter} expenses."
+  end
+
+  def display_total(obj)
+    amount_sum = obj.field_values("amount").map(&:to_f).sum
+    puts "-" * 50
+    puts "Total #{amount_sum.to_s.rjust(21)}"
   end
 end
 
