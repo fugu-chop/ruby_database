@@ -52,8 +52,14 @@ end
 # class to handle expense related commands
 class ExpenseData
   def initialize
-    @db = PG.connect(dbname: 'expenses')
-    setup_schema
+    begin
+      @db = PG.connect(dbname: 'expenses')
+    rescue PG::ConnectionBad
+      setup_database
+      retry
+    else
+      setup_schema
+    end
   end
 
   def add_expense(amount, memo)
@@ -143,6 +149,11 @@ class ExpenseData
                                                   FROM information_schema.tables
                                                   WHERE table_schema = 'public'
                                                   AND table_name = 'expenses';").values.flatten.first == '0'
+  end
+
+  # Execute the database creation if a PG::ConnectionBad error is raised
+  def setup_database
+    `createdb expenses`
   end
 end
 
