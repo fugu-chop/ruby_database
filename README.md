@@ -13,11 +13,7 @@ Expenses through the CLI, and uses the `pg` gem to connect with a Postgres datab
 ### How to Run
 This program is intended to run locally. Once you've cloned the repo, please run `bundle install` to make sure you've got the appropriate gems installed. You will also need to have Postgres installed locally so that expenses can be saved to a database - you can see [how to do this here](https://wiki.postgresql.org/wiki/Homebrew).
 
-You will need to create a local database called `expenses` before executing this program, using syntax similar to this:
-```
-createdb expenses
-```
-The program will take care of creating requisite tables if they don't exist.
+The program will take care of creating requisite database and table if they don't already exist.
 
 Once you have the correct gem versions and Postgres installed, you can use the `./expense` command in your terminal of choice. You can use the following commands:
 - `./expense list`: This will list all the expenses contained in the database so far.
@@ -37,3 +33,5 @@ I chose this split of responsibilities since we can have a class that completely
 The design of the application is always hard - I'm not entirely sure what classes and responsibilities those classes should have ahead of time, and I feel like I'm adjusting on the fly to figure out where methods should live, and what objects should interact with other objects.
 
 There was some fiddliness towards collecting input from the CLI, eventually settling on `$stdin`. I initially tried to pull user input via `gets`, but if the `ARGV` constant (which captures any arguments passed as part of the program execution, in an `Array`) has any values in it (which must have in order to execute commands, in our implementation), then the `Kernel#gets` method tries to treat the first value in the `ARGV` array as a file, which in our case, never is.
+
+The assignment itself asked users to create a Postgres database in the CLI called `expenses` themselves before executing the program. I think that's kinda crap, so I was able to use the backticks notation to execute console commands within Ruby. This allowed me to use a `rescue` block to handle the creation of the database automatically through execution of the program, if it doesn't already exist.
