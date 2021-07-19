@@ -49,6 +49,7 @@ class CLI
   end
 end
 
+# class to handle expense related commands
 class ExpenseData
   def initialize
     @db = PG.connect(dbname: 'expenses')
@@ -132,22 +133,17 @@ class ExpenseData
   def display_total(obj)
     amount_sum = obj.field_values('amount').map(&:to_f).sum
     puts '-' * 50
-    puts "Total #{sprintf("$%#.2f", amount_sum).rjust(21)}"
+    puts "Total #{format('$%#.2f', amount_sum).rjust(21)}"
   end
 
   def setup_schema
-  if @db.exec("SELECT COUNT(*)
-                    FROM information_schema.tables
-                    WHERE table_schema = 'public'
-                    AND table_name = 'expenses';").values.flatten.first == '0'
-    @db.exec("CREATE TABLE expenses (
-      id SERIAL PRIMARY KEY,
-      amount NUMERIC(6,2) NOT NULL CHECK(amount > 0.01),
-      memo TEXT NOT NULL,
-      created_on DATE NOT NULL DEFAULT NOW()
-    );")
+    @db.exec('SET client_min_messages = error')
+    # Adding back ticks is like using the console from within Ruby
+    `psql -d expenses < schema.sql` if @db.exec("SELECT COUNT(*)
+                                                  FROM information_schema.tables
+                                                  WHERE table_schema = 'public'
+                                                  AND table_name = 'expenses';").values.flatten.first == '0'
   end
-end
 end
 
 CLI.new.execute
